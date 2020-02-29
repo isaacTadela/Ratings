@@ -12,11 +12,12 @@
 	<artifactId>rating-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Rating</name>
-	<description>Rating project for Spring Boot</description>
+	<description>Rating project</description>
 
 	<properties>
 		<java.version>11</java.version>
 		<spring-cloud.version>Hoxton.SR1</spring-cloud.version>
+		 <jar.finalName>jf</jar.finalName>
 	</properties>
 
 	<dependencies>
@@ -28,10 +29,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
-		<dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
-        </dependency>
+		
         
 		<dependency>
 		    <groupId>io.springfox</groupId>
@@ -62,6 +60,12 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>
+				spring-cloud-starter-netflix-eureka-client
+			</artifactId>
+		</dependency>
 	</dependencies>
 
 	<dependencyManagement>
@@ -77,10 +81,15 @@
 	</dependencyManagement>
 
 	<build>
-		<plugins>
+	 <finalName>${project.name}</finalName>
+	 <plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>				
+        			<outputFileNameMapping>@{groupId}@.@{extension}@</outputFileNameMapping>
+			        <finalName>${project.name}</finalName>                   
+    			</configuration>
 			</plugin>
 		</plugins>
 	</build>

@@ -2,7 +2,9 @@ package ratings.resources;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +15,9 @@ import ratings.models.Rating;
 import ratings.service.RatingService;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 
 @RestController
 @RequestMapping("/")
@@ -41,8 +46,8 @@ public class RatingController {
 	@ApiOperation( value = "List of all the items and their ratings", 
 	notes = "Find all the items and their ratings", response = Rating.class)
 	public List<Rating> getAllItems() {
-		if(apiKey.toString().equals("Ratings-data-service") )
-  		  System.out.println("GET, successfully read your api key..." + apiKey.toString()  );
+		if(!apiKey.toString().equals("Ratings-data-service") )
+  		  System.out.println("Unsuccessfully read your api key..." + apiKey.toString()  );
 		return ratings.findAll();
 	}
 	
@@ -50,8 +55,8 @@ public class RatingController {
 	@ApiOperation( value = "Add a rating", 
 	notes = "Add a rating to the list", response = Rating.class)
 	public Rating addRating(@RequestBody Rating rating) {
-		if(apiKey.toString().equals("Ratings-data-service") )
-  		  System.out.println("POST, successfully read your api key..." + apiKey.toString()  );
+		if(!apiKey.toString().equals("Ratings-data-service") )
+  		  System.out.println("Unsuccessfully read your api key..." + apiKey.toString()  );
 		return ratings.addRating(rating); 
 	}
 	
@@ -59,8 +64,8 @@ public class RatingController {
 	@ApiOperation(value = "Delete a rating", 
 	notes = "Delete a rating fron the list", response = Rating.class)
 	public void deleteRating(@RequestBody Rating rating) {
-		if(apiKey.toString().equals("Ratings-data-service") )
-			System.out.println("DELETE, "+rating +" successfully read your api key..." + apiKey.toString()  );
+		if(!apiKey.toString().equals("Ratings-data-service") )
+			System.out.println("Unsuccessfully read your api key..." + apiKey.toString()  );
 		
 		ratings.deleteRating(rating); 
 	}
@@ -88,5 +93,24 @@ public class RatingController {
 		newRating = rating;
 		return ratings.addRating(newRating); 
 	}
+	
+	@ExceptionHandler({Exception.class, TransactionSystemException.class, ConstraintViolationException.class})
+    public String handleException(Exception exp) {
+		// Item's rating is not in range 
+		if(exp.getClass() == TransactionSystemException.class )
+		{
+			Throwable t = ((TransactionSystemException)exp).getOriginalException().getCause();
+			if(t.getClass() == ConstraintViolationException.class )
+			{
+				Object[] o = ((ConstraintViolationException)t).getConstraintViolations().toArray();
+				return ((ConstraintViolation<?>) o[0]).getMessageTemplate();
+			}			
+			return t.toString();
+		}
+
+		//something went wrong
+		return "My default Exception for Ratings controller\n"
+				+ "class: "+exp.getClass()+"\nMessage: "+ exp.getMessage();	
+    }	
 	
 }

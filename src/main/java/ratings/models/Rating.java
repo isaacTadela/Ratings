@@ -3,20 +3,26 @@ package ratings.models;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.IdClass;
 import javax.persistence.Table;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 
 @Entity
 @Table ( name = "Rating" )
+@IdClass(CompositeKey.class)
 public class Rating {
 
 	@Id
-	@Column(name = "itemId",unique=true, nullable = false)
+	@Column(name = "itemId", nullable = false) 
     private String itemId = "itemId";
-	
+	@Id
 	@Column(name = "userId", nullable = false)
 	private String userId = "NoUser";
 
 	@Column(name = "rating", nullable = false,columnDefinition = "float default 0")
+	@Min(value = 0, message = "Rating can't be less than 0")
+	@Max(value = 10, message = "Rating can't be more than 10")
 	private float rating;
 
 	public Rating() {}
@@ -55,11 +61,6 @@ public class Rating {
 
 	public void setUserId(String userId) {
 		this.userId = userId;
-	}
-
-	@Override
-	public String toString() {
-		return "Rating [itemId=" + itemId + ", userId=" + userId + ", rating=" + rating + "]";
 	}
 	
 }
